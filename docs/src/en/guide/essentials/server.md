@@ -354,3 +354,37 @@ Since mock is essentially a real backend service, if you do not need the mock se
 # .env.development
 VITE_NITRO_MOCK=false
 ```
+
+### Integrating with a Django Backend
+
+When the backend API is implemented with Django, configure the development environment so that the frontend can proxy requests to your Django server.
+
+1. Set the API prefix in `.env.development`:
+
+   ```bash
+   VITE_GLOB_API_URL=/api
+   ```
+
+2. Update the proxy target in `vite.config.mts` to match the Django server address and port:
+
+   ```ts
+   proxy: {
+     '/api': {
+       changeOrigin: true,
+       rewrite: (path) => path.replace(/^\/api/, ''),
+       target: 'http://localhost:8000/api',
+     },
+   }
+   ```
+
+With these settings, calls such as:
+
+```ts
+import axios from 'axios';
+
+axios.get('/api/customers').then((res) => {
+  console.log(res.data);
+});
+```
+
+will be proxied to your Django application running on `http://localhost:8000`.
